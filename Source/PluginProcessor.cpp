@@ -166,7 +166,9 @@ bool SimpleeqAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleeqAudioProcessor::createEditor()
 {
-    return new SimpleeqAudioProcessorEditor (*this);
+    // return new SimpleeqAudioProcessorEditor (*this);
+
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -188,4 +190,61 @@ void SimpleeqAudioProcessor::setStateInformation (const void* data, int sizeInBy
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new SimpleeqAudioProcessor();
+}
+
+
+// My methods
+
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleeqAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    // Parameter for silencing low frequencies
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "LowCut Freq",
+        "LowCut Freq",
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+        20.f));
+
+    // Parameter for silencing high frequencies
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "HighCut Freq",
+        "HighCut Freq",
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+        20000.f));
+
+    // Parameter for selecting spcific frequency
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Freq",
+        "Peak Freq",
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+        750.f));
+
+    // Parameter for amplifying spcific frequency
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Gain",
+        "Peak Gain",
+        juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
+        0.0f));
+
+    // Parameter for selecting the width of specific frequency
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Quality",
+        "Peak Quality",
+        juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f),
+        1.0f));
+
+    // Some value choice parameter. Decibels per octate?
+    juce::StringArray stringArray;
+    for (int i = 0; i < 4; ++i)
+    {
+        juce::String str;
+        str << (12 + i * 12);
+        str << " db/Oct";
+        stringArray.add(str);
+    }
+    layout.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope", stringArray, 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", stringArray, 0));
+
+    return layout;
 }

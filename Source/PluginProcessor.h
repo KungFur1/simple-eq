@@ -104,14 +104,14 @@ private:
     template<typename ChainType, typename CoefficientType>
     void updateCutFilter(ChainType& leftLowCut,
         const CoefficientType& coefficients,
-        const ChainSettings& chainSettings)
+        const Slope& slope)
     {
         leftLowCut.setBypassed<0>(true);
         leftLowCut.setBypassed<1>(true);
         leftLowCut.setBypassed<2>(true);
         leftLowCut.setBypassed<3>(true);
 
-        switch (chainSettings.lowCutSlope)
+        switch (slope)
         {
         case Slope_48:
             update<3>(leftLowCut, coefficients);
@@ -123,6 +123,7 @@ private:
             update<0>(leftLowCut, coefficients);
         }
     }
+
 
 
     //==============================================================================

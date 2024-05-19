@@ -94,9 +94,16 @@ private:
     using Coefficients = Filter::CoefficientsPtr;
     static void updateCoefficients(Coefficients& old, const Coefficients& replacements);
 
+    template<int Index, typename ChainType, typename CoefficientType>
+    void update(ChainType& chain, const CoefficientType& coefficients)
+    {
+        updateCoefficients(chain.get<Index>().coefficients, coefficients[Index]);
+        chain.setBypassed<Index>(false);
+    }
+
     template<typename ChainType, typename CoefficientType>
     void updateCutFilter(ChainType& leftLowCut,
-        const CoefficientType& cutCoefficients,
+        const CoefficientType& coefficients,
         const ChainSettings& chainSettings)
     {
         leftLowCut.setBypassed<0>(true);
@@ -107,18 +114,13 @@ private:
         switch (chainSettings.lowCutSlope)
         {
         case Slope_48:
-            *leftLowCut.get<3>().coefficients = *cutCoefficients[3];
-            leftLowCut.setBypassed<3>(false);
-            break;
+            update<3>(leftLowCut, coefficients);
         case Slope_36:
-            *leftLowCut.get<2>().coefficients = *cutCoefficients[2];
-            leftLowCut.setBypassed<2>(false);
+            update<2>(leftLowCut, coefficients);
         case Slope_24:
-            *leftLowCut.get<1>().coefficients = *cutCoefficients[1];
-            leftLowCut.setBypassed<1>(false);
+            update<1>(leftLowCut, coefficients);
         case Slope_12:
-            *leftLowCut.get<0>().coefficients = *cutCoefficients[0];
-            leftLowCut.setBypassed<0>(false);
+            update<0>(leftLowCut, coefficients);
         }
     }
 

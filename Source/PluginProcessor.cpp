@@ -174,6 +174,7 @@ void SimpleeqAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     rightChain.process(rightContext);
     // Finished: 38:56 https://www.youtube.com/watch?v=i_Iq4_Kd7Rc
     // Finished: 1:26:47
+    // Finished: 2:10:44
 }
 
 //==============================================================================

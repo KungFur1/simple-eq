@@ -28,11 +28,24 @@ SimpleeqAudioProcessorEditor::SimpleeqAudioProcessorEditor(SimpleeqAudioProcesso
         addAndMakeVisible(comp);
     }
 
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params)
+    {
+        param->addListener(this);
+    }
+
+    startTimerHz(60);
+
     setSize (600, 400);
 }
 
 SimpleeqAudioProcessorEditor::~SimpleeqAudioProcessorEditor()
 {
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params)
+    {
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
@@ -54,14 +67,12 @@ void SimpleeqAudioProcessorEditor::paint (juce::Graphics& g)
     auto sampleRate = audioProcessor.getSampleRate();
 
     std::vector<double> mags;
-
     mags.resize(w);
-
     for (int i = 0; i < w; ++i)
     {
         double mag = 1.f;
         auto freq = mapToLog10(double(i) / double(w), 20.0, 20000.0);
-        if (monoChain.isBypassed<ChainPositions::Peak>())
+        if (!monoChain.isBypassed<ChainPositions::Peak>())
             mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
         if (!lowcut.isBypassed<0>())
@@ -140,7 +151,11 @@ void SimpleeqAudioProcessorEditor::timerCallback()
     if (parametersChanged.compareAndSetBool(false, true))
     {
         // update the monochain
+        auto chainSettings = getChainSettings(audioProcessor.apvts);
+        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
         // signal a repaint
+        repaint();
     }
 }
 
